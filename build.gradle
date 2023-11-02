@@ -1,0 +1,48 @@
+plugins {
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '+'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+	implementation group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "+"
+}
+
+// CONFIGURATION
+
+application {
+	mainClass = "fr.xxgoldenbluexx.paper_server_updater.PaperServerUpdater"
+}
+
+group = 'fr.xxgoldenbluexx'
+version = '0.0.1'
+description = 'Outil de mise a jour du serveur paper'
+
+compileJava.options.encoding = 'UTF-8'
+
+jar{
+	manifest{
+		attributes["Main-Class"] = "fr.xxgoldenbluexx.paper_server_updater.PaperServerUpdater"
+	}
+}
+
+shadowJar{
+	/* <Workaround for https://github.com/johnrengelman/shadow/issues/448> */
+	project.configurations.implementation.canBeResolved = true
+    configurations = [project.configurations.implementation]
+    /* </Workaround> */
+    archiveFileName = "${project.name}-${version}.jar"
+}
+
+// DEFAULT TASKS
+
+tasks.register('dev', Copy) {
+	group = "developpement"
+	description = "Envoie le jar sur le server de développement"
+	from shadowJar
+	into DevServerDirectory
+}
